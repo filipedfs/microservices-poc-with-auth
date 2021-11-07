@@ -1,0 +1,3 @@
+[submodule "microservices-config-server"]
+	path = microservices-config-server
+	url = https://github.com/filipedfs/microservices-config-server.git
