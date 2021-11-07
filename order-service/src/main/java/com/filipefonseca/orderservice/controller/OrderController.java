@@ -9,15 +9,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreaker;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
 @RestController
@@ -30,6 +30,7 @@ public class OrderController {
     private final InventoryClient inventoryClient;
     private final Resilience4JCircuitBreakerFactory circuitBreakerFactory;
     private final StreamBridge streamBridge;
+    private final ExecutorService traceableExecutorService;
 
     //    @GetMapping
     //    public String index() {
@@ -43,9 +44,13 @@ public class OrderController {
 
     @PostMapping
     public String placeOrder(@RequestBody OrderDto orderDto) {
+        circuitBreakerFactory.configureExecutorService(traceableExecutorService);
         Resilience4JCircuitBreaker circuitBreaker = circuitBreakerFactory.create("inventory");
         Supplier<Boolean> booleanSupplier = () -> orderDto.getOrderLineItems().stream()
-                .allMatch(orderLineItem -> inventoryClient.checkStock(orderLineItem.getSkuCode()));
+                .allMatch(orderLineItem -> {
+                    log.info("Making call to Inventory Service for SkuCode {}.", orderLineItem.getSkuCode());
+                    return inventoryClient.checkStock(orderLineItem.getSkuCode());
+                });
 
         boolean allProductsInStock = circuitBreaker.run(booleanSupplier, this::handleErrorCase);
 
@@ -54,7 +59,8 @@ public class OrderController {
             order.setOrderLineItems(order.getOrderLineItems());
             order.setOrderNumber(UUID.randomUUID().toString());
             orderRepository.save(order);
-            streamBridge.send("notificationEventSupplier-out-0", order.getId());
+            log.info("Sending order details with order id {} to Notification Service.", order.getId());
+            streamBridge.send("notificationEventSupplier-out-0", MessageBuilder.withPayload( order.getId()));
             return "Order placed successfully";
         }
         else {

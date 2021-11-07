@@ -69,4 +69,8 @@ services:
     ports:
       - "8200:8200"
 
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
 

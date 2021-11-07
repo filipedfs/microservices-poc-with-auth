@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="InventoryServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="InventoryServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" folderName="Services">
     <module name="inventory-service" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />

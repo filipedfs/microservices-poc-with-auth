@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="OrderServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+  <configuration default="false" name="OrderServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" folderName="Services" nameIsGenerated="true">
     <module name="order-service" />
     <extension name="coverage">
       <pattern>
