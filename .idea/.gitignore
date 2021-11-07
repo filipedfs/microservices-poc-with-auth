@@ -7,3 +7,6 @@
 /dataSources/
 /dataSources.local.xml
 /libraries/
+uiDesigner.xml
+jarRepositories.xml
+jpa-buddy.xml
